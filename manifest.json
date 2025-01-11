@@ -12,6 +12,14 @@
     {
       "matches": ["https://www.youtube.com/*"],
       "js": ["scripts/content.js"]
+    },
+    {
+      "matches": ["https://docs.google.com/forms/d/e/*"],
+      "js": ["scripts/viewForm.js"]
+    },
+    {
+      "matches": ["https://docs.google.com/forms/u/0/d/e/*"],
+      "js": ["scripts/formResponse.js"]
     }
   ],
   "icons": {
