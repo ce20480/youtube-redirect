@@ -151,18 +151,41 @@
 //
 
 // Listen for messages from the service worker
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   if (message.action === "getVideoTitle") {
+//     // Extract the video title from the DOM
+//     // const titleElement = document.querySelector(
+//     //   "ytd-watch-metadata h1 > yt-formatted-string",
+//     // );
+//     const titleElement = document.querySelector(
+//       "ytd-watch-metadata #title > h1 > yt-formatted-string",
+//     );
+//     const videoTitle = titleElement
+//       ? titleElement.textContent.trim()
+//       : "unknown title";
+//     sendResponse({ videoTitle }); // Send back the title
+//   }
+// });
+
+// content.js
+
+// 1. Listen for messages from the background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "getVideoTitle") {
-    // Extract the video title from the DOM
-    // const titleElement = document.querySelector(
-    //   "ytd-watch-metadata h1 > yt-formatted-string",
-    // );
+    // 2. Extract the video title from the DOM
     const titleElement = document.querySelector(
       "ytd-watch-metadata #title > h1 > yt-formatted-string",
     );
+
+    // If that selector doesn't work for you, adjust as needed
     const videoTitle = titleElement
       ? titleElement.textContent.trim()
       : "unknown title";
-    sendResponse({ videoTitle }); // Send back the title
+
+    // 3. Send back the title
+    sendResponse({ videoTitle });
   }
+
+  // Let Chrome know we'll do async sendResponse if needed (not strictly required here)
+  return true;
 });

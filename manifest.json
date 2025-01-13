@@ -12,14 +12,16 @@
     {
       "matches": ["https://www.youtube.com/*"],
       "js": ["scripts/content.js"]
-    },
+    }
+  ],
+  "web_accessible_resources": [
     {
-      "matches": ["https://docs.google.com/forms/d/e/*"],
-      "js": ["scripts/viewForm.js"]
-    },
-    {
-      "matches": ["https://docs.google.com/forms/u/0/d/e/*"],
-      "js": ["scripts/formResponse.js"]
+      "resources": [
+        "survey/survey.html",
+        "survey/survey.js",
+        "survey/survey.css"
+      ],
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {

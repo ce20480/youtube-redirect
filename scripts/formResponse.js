@@ -178,9 +178,9 @@ async function evaluateAndRedirect() {
               originalVideoUrl,
             );
             alert("Your response was approved. Redirecting to the video.");
-            setTimeout(() => {
-              window.location.href = originalVideoUrl;
-            }, 1000);
+            // setTimeout(() => {
+            //   window.location.href = originalVideoUrl;
+            // }, 1000);
           } else {
             console.error("Original video URL is missing.");
             alert("Original video URL is missing. Unable to redirect.");
@@ -188,10 +188,10 @@ async function evaluateAndRedirect() {
         } else {
           console.log("LLM disapproved the survey response.");
           alert("Your reason was not approved. Please try again.");
-          setTimeout(() => {
-            window.location.href =
-              "https://docs.google.com/forms/d/e/1FAIpQLSeJ7uD_DhqQUjwUwrqg3tPnzuD5FkONkjvEPXCvjsUtBYk_6A/viewform";
-          }, 1000);
+          // setTimeout(() => {
+          //   window.location.href =
+          //     "https://docs.google.com/forms/d/e/1FAIpQLSeJ7uD_DhqQUjwUwrqg3tPnzuD5FkONkjvEPXCvjsUtBYk_6A/viewform";
+          // }, 1000);
         }
       } catch (error) {
         console.error("Error during LLM evaluation:", error);

@@ -3,11 +3,12 @@ import os
 import re
 
 from flask import Flask, jsonify, request
-from flask_cors import CORS
+
+# from flask_cors import CORS
 from llama_cpp import Llama
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 
 # Load your local model (example uses Hugging Face Transformers)
 # MODEL_PATH = "/Users/avini/.lmstudio/models/mlx-community/Llama-3.2-3B-Instruct-4bit"  # Replace with your locally downloaded model
@@ -19,10 +20,12 @@ CORS(app)
 # )
 
 PATH_TO_MODEL = "./models/Llama 3.2 3B Instruct.gguf"
-CONTEXT_SIZE = 512
+CONTEXT_SIZE = 1024
 
 if os.path.exists(PATH_TO_MODEL):
     # load model from local models directory
+    print("Model path found:", os.path.exists(PATH_TO_MODEL))
+    print("Model path:", PATH_TO_MODEL)
     llm = Llama(
         model_path=PATH_TO_MODEL,
         # vocab_only=True,
@@ -56,11 +59,15 @@ def generate_text_from_prompt(
     return model_output
 
 
-@app.route("/evaluate", methods=["POST"])
+@app.route("/evaluate", methods=["POST", "OPTIONS"])
 def evaluate():
     """
     Evaluate the survey response and decide if watching the video is justified.
     """
+    if request.method == "OPTIONS":
+        # Preflight request
+        return jsonify({}), 200
+
     data = request.json  # Receive JSON data from the extension
     if not data or not all(key in data for key in ("survey_response", "video_title")):
         return jsonify({"error": "Invalid input"}), 400
@@ -87,29 +94,52 @@ def evaluate():
     #     f'   - "False": The justification is invalid.\n\n'
     #     f"Provide a concise explanation (in one or two sentences) for your decision."
     # )
+    # prompt = f"""
+    # You are an intelligent assistant that evaluates survey responses. Your task:
+    #
+    # Survey Response: {survey_response}
+    # Video Title: {video_title}
+    #
+    # Instructions:
+    # 1. Determine if the survey response justifies watching the video.
+    # 2. Respond ONLY in this exact format:
+    #    <True/False>
+    #    <Justification>
+    # 3. Do NOT provide any additional comments, edge-case reasoning, or default responses.
+    #
+    # Example:
+    # True
+    # The justification provided is sufficient to support the user's claim.
+    #
+    # Please evaluate the survey response.
+    #
+    # <True/False>
+    # <Justification>
+    # """
     prompt = f"""
-    You are an intelligent assistant that evaluates survey responses. Your task:
+You are an intelligent assistant that evaluates survey responses. Your task:
 
-    Survey Response: {survey_response}
-    Video Title: {video_title}
+1. You will receive:
+   - Survey Response: {survey_response}
+   - Video Title: {video_title}
 
-    Instructions:
-    1. Determine if the survey response justifies watching the video.
-    2. Respond ONLY in this exact format:
-       <True/False>
-       <Justification>
-    3. Do NOT provide any additional comments, edge-case reasoning, or default responses.
+2. Determine whether the survey response demonstrates a sufficiently productive or useful reason for watching the video.
 
-    Example:
-    True
-    The justification provided is sufficient to support the user's claim.
+3. Return the decision in JSON format with exactly two keys:
+   - "Verdict": must be either "True" or "False".
+   - "Explanation": a short justification (1–2 sentences) explaining why the verdict is true or false.
 
-    Please evaluate the survey response.
+4. Do NOT provide any additional keys, disclaimers, or text. Your response must be only the JSON object.
 
-    <True/False>
-    <Justification>
-    """
+Example:
 
+{{
+  "Verdict": "True",
+  "Explanation": "The user clearly shows a compelling reason to watch the video and benefits from its content."
+}}
+
+Please evaluate the survey response and return only the JSON as specified.
+"""
     # max_tokens = 100
     # temperature = 0.3
     # top_p = 0.1
@@ -130,14 +160,20 @@ def evaluate():
 
     # Extract the response text when using the local llm method
     generated_text = result["choices"][0]["text"].strip()
+    # generated_text = generated_text.replace(prompt, "")
+    # return jsonify({"decision": generated_text})
 
     # Regex to extract the first True/False and justification sentence
 
-    match = re.search(r"(True|False)\s*(.*)", generated_text, re.DOTALL)
-    if match:
-        decision, justification = match.groups()
-        decision = decision.strip()
-        justification = justification.strip()
+    # match = re.search(r"(True|False)\s*(.*)", generated_text, re.DOTALL)
+    # if match:
+    #     decision, justification = match.groups()
+    #     decision = decision.strip()
+    #     justification = justification.strip()
+    # else:
+    #     decision = "False"
+    #     justification = "The model did not provide a valid response."
+    decision, justification = parse_llm_response(generated_text)
 
     # Removing prompt from generated
     # generated_text = generated_text.replace(prompt, "")
@@ -155,6 +191,52 @@ def evaluate():
 
     # return jsonify({"decision": decision, "evaluation": generated_text})
     return jsonify({"decision": decision, "evaluation": justification})
+
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    return response
+
+
+def parse_llm_response(generated_text):
+    """
+    Parse the LLM response to extract the decision and justification.
+    Handles cases where the response includes the prompt, examples, or extra text.
+    """
+    try:
+        # Extract the last JSON block using regex
+        json_matches = re.findall(r"{.*?}", generated_text, re.DOTALL)
+        if not json_matches:
+            raise ValueError("No valid JSON blocks found in the response.")
+
+        # Use the last JSON block
+        cleaned_text = json_matches[-1]
+
+        # Attempt to parse the JSON
+        parsed_response = json.loads(cleaned_text)
+        decision = parsed_response.get("Verdict", "False").strip()
+        justification = parsed_response.get(
+            "Explanation", "The model did not provide a valid response."
+        ).strip()
+        return decision, justification
+
+    except (json.JSONDecodeError, ValueError) as e:
+        # Fallback to regex if JSON parsing fails
+        print("Invalid JSON, falling back to regex parsing:", e)
+        match = re.search(
+            r"\"Verdict\":\s*\"(True|False)\".*?\"Explanation\":\s*\"(.*?)\"",
+            generated_text,
+            re.DOTALL,
+        )
+        if match:
+            decision, justification = match.groups()
+            return decision.strip(), justification.strip()
+        else:
+            # If neither JSON nor regex works, default to False
+            return "False", "The model did not provide a valid response."
 
 
 if __name__ == "__main__":

@@ -1,0 +1,68 @@
+<!-- <!doctype html> -->
+<!-- <html> -->
+<!--   <head> -->
+<!--     <meta charset="utf-8" /> -->
+<!--     <title>Local Survey</title> -->
+<!--     <!-- Link to your local CSS -->
+-->
+<!--     <link rel="stylesheet" href="survey.css" /> -->
+<!--   </head> -->
+<!--   <body> -->
+<!--     <div class="container"> -->
+<!--       <h1>Productivity Survey</h1> -->
+<!--       <p>Please provide a reason why you want to watch this video:</p> -->
+<!--       <textarea id="reason"></textarea> -->
+<!--       <button id="submitBtn">Submit</button> -->
+<!--     </div> -->
+<!--     <script src="survey.js"></script> -->
+<!--   </body> -->
+<!-- </html> -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Survey</title>
+    <!-- Link to your external CSS file -->
+    <link rel="stylesheet" href="survey.css" />
+  </head>
+  <body>
+    <!-- Main container -->
+    <div class="survey-container">
+      <!-- Heading / Hero section -->
+      <header class="survey-hero">
+        <!-- Optional badge or branding at the top -->
+        <div class="hero-badge">Productivity Check</div>
+        <h1>Why do you want to watch this video?</h1>
+        <p class="hero-subtitle">
+          Please provide a brief justification to help you stay mindful of your
+          goals.
+        </p>
+      </header>
+
+      <!-- Survey form section -->
+      <form id="survey-form" class="survey-form">
+        <!-- Single question example -->
+        <label for="reason" class="survey-label">Your Reason:</label>
+        <textarea
+          id="reason"
+          name="reason"
+          class="survey-textarea"
+          placeholder="Share your thoughts..."
+        ></textarea>
+
+        <!-- Submit button -->
+        <button id="submitBtn" type="button" class="survey-button">
+          Submit
+        </button>
+      </form>
+
+      <!-- You can include a status message or footnote at the bottom -->
+      <footer class="survey-footer">
+        <p>Stay on track with your viewing habits!</p>
+      </footer>
+    </div>
+
+    <!-- If you have a separate JS script (like survey.js), you might include it here -->
+    <script src="survey.js"></script>
+  </body>
+</html>
