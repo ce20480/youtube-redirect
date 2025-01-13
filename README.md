@@ -43,7 +43,7 @@ Copy code
 python server.py
 The server will start at http://{Your local server/ Your defined server}.
 
-4.Update Survey Logic (Optional):
+4. Update Survey Logic (Optional):
 
 Modify the evaluation prompt in server.py to better fit your use case.
 Start Using the Extension:
