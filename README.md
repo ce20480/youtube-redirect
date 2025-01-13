@@ -41,7 +41,7 @@ Run the server:
 bash
 Copy code
 python server.py
-The server will start at http://127.0.0.1:5000/.
+The server will start at http://{Your local server/ Your defined server}.
 
 4.Update Survey Logic (Optional):
 
