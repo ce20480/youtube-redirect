@@ -100,7 +100,7 @@ We welcome contributions! Here’s how you can help:
 9. Fork the repository on GitHub.
 Clone your fork:
 
-git clone https://github.com/your-username/youtube-productivity-redirector.git
+git clone https://github.com/ce20480/youtube-productivity-redirector.git
 cd youtube-productivity-redirector
 Create a branch for your feature or fix:
 
